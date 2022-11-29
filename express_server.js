@@ -40,6 +40,12 @@ app.get("/set", (req, res) => {
   res.render("urls_index", templateVars);
  });
 
+ app.get("/urls/:id", (req, res) => {
+  //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
+  const templateVars = {id: req.params.id, longURL: urlDatabase[req.params.id]};
+  res.render("urls_show", templateVars);
+ });
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
