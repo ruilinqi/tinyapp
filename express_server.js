@@ -9,6 +9,9 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.use(express.urlencoded({ extended: true }));
+
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -40,11 +43,20 @@ app.get("/set", (req, res) => {
   res.render("urls_index", templateVars);
  });
 
+ app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+ });
+
  app.get("/urls/:id", (req, res) => {
   //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
   const templateVars = {id: req.params.id, longURL: urlDatabase[req.params.id]};
   res.render("urls_show", templateVars);
  });
+
+ app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
