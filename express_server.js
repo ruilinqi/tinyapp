@@ -21,7 +21,8 @@ app.get("/urls.json", (req, res) => {
 
 // add route
 app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  const templateVars = { greeting: "Hello World!" };
+  res.render("hello_world", templateVars);
 });
 // curl -i http://localhost:8080/hello
 
@@ -32,6 +33,11 @@ app.get("/set", (req, res) => {
  
  app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
+ });
+
+ app.get("/urls", (req, res) => {
+  const templateVars = {urls: urlDatabase};
+  res.render("urls_index", templateVars);
  });
 
 app.listen(PORT, () => {
