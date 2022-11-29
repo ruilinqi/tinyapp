@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/ruilinqi/tinyapp/issues"
   },
-  "homepage": "https://github.com/ruilinqi/tinyapp#readme"
+  "homepage": "https://github.com/ruilinqi/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
