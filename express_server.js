@@ -67,7 +67,6 @@ app.get("/set", (req, res) => {
   //const templateVars = {urls: urlDatabase};
   //res.render("urls_index", templateVars);
 
-  //Display the Username
   const templateVars = {
     user: users[req.cookies.user_id],
     urls: urlDatabase
@@ -82,7 +81,7 @@ app.get("/set", (req, res) => {
   
   // the id-longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
   const newid = generateRandomString();
-  const longURL = req.body;
+  const { longURL } = req.body;
   urlDatabase[newid] = { longURL, newid};
 
   // when it receives a POST request to /urls it responds with a redirection to /urls/:id.
@@ -90,7 +89,14 @@ app.get("/set", (req, res) => {
 });
 
  app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const user = users[req.cookies.user_id];
+  if (user) {
+    const templateVars = { user };
+    res.render("urls_new", templateVars);  
+  } else {
+    res.redirect("/login");
+    return res.status(400).send("Please login first!")
+  }
  });
 
  app.get("/urls/:id", (req, res) => {
@@ -118,6 +124,14 @@ app.post("/urls/:id", (req, res) => {
   // const id = req.params.id;
   // const longURL = req.body.longURL;
   // urlDatabase[id].longURL = longURL;
+  const user = users[req.cookies.user_id];
+  const id = req.params.id;
+  //const longURL = urlDatabase[req.params.id];
+  const longURL = req.body.longURL;
+  urlDatabase[id].longURL = longURL;
+
+  const templateVars = {user, id, longURL};
+
   res.redirect("/urls");
  });
 
@@ -163,25 +177,41 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-
+  const templateVars = {
+    user: users[req.cookies.user_id],
+    urls: urlDatabase
+  };
+  res.render("urls_login", templateVars);
 });
 
 app.post("/login", (req, res) => {  
-  // const username = req.body.username;
-  // res.cookie("user_id:", user_id);
-  // res.redirect("/urls");
+  //const id = req.body.id;
   const email = req.body.email;
   const password = req.body.password;
-  if (!email || !password ) {
-    return res.status(400).send("Email or password is empty!");
+  if (email === '' || password === '') {
+    return res.status(400).send("Email or password is invaild!");
   }
-//
+  const userAlreadyExist = getUserByEmail(email);
+  if (!userAlreadyExist) {
+    return res.status(403).send("Your email hasn't registered yet!");
+  } else if (userAlreadyExist) {
+    console.log(userAlreadyExist.password, password);
+    console.log(req.body, email, password);
+
+    if (userAlreadyExist.password !== password) {
+      return res.status(403).send("Your password is wrong!");
+    } else {
+      res.cookie("user_id", userAlreadyExist.id);
+      res.redirect("/urls");
+    }
+  }
+  console.log("Doing POST login");
+
 });
 
  app.post("/logout", (req, res) => {  
-  //const username = req.body.username;
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
  });
 
 app.listen(PORT, () => {
