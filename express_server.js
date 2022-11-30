@@ -42,6 +42,20 @@ app.get("/set", (req, res) => {
   const templateVars = {urls: urlDatabase};
   res.render("urls_index", templateVars);
  });
+ 
+ //Add POST route to expressserver.js to receive form submission
+ app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok. We are redirecting you to the new page you just created."); // Respond with 'Ok' (we will replace this)
+  
+  // the id-longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
+  const newid = generateRandomString();
+  const longURL = req.body;
+  urlDatabase[newid] = { longURL, newid};
+
+  // when it receives a POST request to /urls it responds with a redirection to /urls/:id.
+  res.redirect("/urls/:id");
+});
 
  app.get("/urls/new", (req, res) => {
   res.render("urls_new");
@@ -53,17 +67,6 @@ app.get("/set", (req, res) => {
   res.render("urls_show", templateVars);
  });
 
- //Add POST route to expressserver.js to receive form submission
- app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok. We are redirecting you to the new page you just created."); // Respond with 'Ok' (we will replace this)
-  // the id-longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
-  
-  // when it receives a POST request to /urls it responds with a redirection to /urls/:id.
-  res.redirect("/urls/:id");
-});
-
-
 
 // Redirect any request to "/u/:id" to its longURL
 app.get("/u/:id", (req, res) => {
@@ -71,9 +74,20 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+// Add POST route for /urls/:id/delete to remove URLs
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+
+  res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 
-function generateRandomString() {}
+function generateRandomString() {
+  let newid = Math.floor((1+Math.random()) * 0x1000000).toString(16).substring(1);
+  return newid;
+}
