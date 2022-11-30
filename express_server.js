@@ -28,7 +28,7 @@ const urlDatabase = {
 
 app.use(express.urlencoded({ extended: true }));
 
-const findUserByEmail = (userEmail) => {
+const getUserByEmail = (userEmail) => {
   for (const key in users) {
     if (users[key].email === userEmail) {
       return users[key];
@@ -151,7 +151,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email or password is invaild, please check them.");
   }
   //
-  const userAlreadyExist = findUserByEmail(email);
+  const userAlreadyExist = getUserByEmail(email);
   if (userAlreadyExist) {
     return res.status(400).send("User with ${email} is already exist.")
   } else {
