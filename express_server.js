@@ -95,7 +95,7 @@ app.get("/set", (req, res) => {
 
  app.get("/urls/:id", (req, res) => {
   //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
-  const user = users[req.cookie.user_id];
+  const user = users[req.cookies.user_id];
   const id = req.params.id;
   const longURL = urlDatabase[req.params.id];
 
@@ -147,19 +147,23 @@ app.post("/register", (req, res) => {
     id, email, password
   };
 
-  if (!email || !password) {
+  if (email === '' || password === '') {
     return res.status(400).send("Email or password is invaild, please check them.");
   }
   //
   const userAlreadyExist = getUserByEmail(email);
   if (userAlreadyExist) {
-    return res.status(400).send("User with ${email} is already exist.")
+    return res.status(400).send(`User with ${email} is already exist.`)
   } else {
     users[user.id] = user;
     res.cookie('user_id', user.id);
     res.redirect("/urls"); // Redirect the user to the /urls page.
   }
-  console.log("Doing POST register")
+  console.log("Doing POST register");
+});
+
+app.get("/login", (req, res) => {
+
 });
 
 app.post("/login", (req, res) => {  

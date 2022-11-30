@@ -15,26 +15,29 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-
-        <!--
-        <div class="form-group">
-          <label for="longURL"> Login </label>
-          <input type="text" name="user" value="<%= user %>">
-          <button type="submit" class="btn btn-primary" form="update">Submit</button>
-        </div>
-        -->
-        <a class="nav-item nav-link" href="/login">Login</a>
-        <a class="nav-item nav-link" href="/register">Register</a>
-
-        <div>
-          <% if(user) %>
-        </div>
-          </form>
-        </div>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>      
       </div>
     </div>
 
+
+    <div>
+      <% if (user) { %>
+        <div>
+          <form method="POST" action="/logout" class="form-line">
+            <div class="form-group">
+              <label for="longURL"> Login </label>
+              <label>Logged In As: <%= user.email %></label>
+              <button type="submit" class="btn btn-primary">Logout</button>
+            </div>
+          </form>
+        </div>
+      <% } else { %>
+        <div class="navbar">
+          <a class="nav-item nav-link" href="/login">Login</a>
+          <a class="nav-item nav-link" href="/register">Register</a>
+        </div>
+      <% } %>
+    </div>
     
   </nav>
 </header>
