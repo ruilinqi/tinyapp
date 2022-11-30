@@ -53,11 +53,27 @@ app.get("/set", (req, res) => {
   res.render("urls_show", templateVars);
  });
 
+ //Add POST route to expressserver.js to receive form submission
  app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.send("Ok. We are redirecting you to the new page you just created."); // Respond with 'Ok' (we will replace this)
+  // the id-longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
+  
+  // when it receives a POST request to /urls it responds with a redirection to /urls/:id.
+  res.redirect("/urls/:id");
+});
+
+
+
+// Redirect any request to "/u/:id" to its longURL
+app.get("/u/:id", (req, res) => {
+  // const longURL = ...
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
+function generateRandomString() {}
