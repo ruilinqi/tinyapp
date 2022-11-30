@@ -25,6 +25,7 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
+            <th scope="col">Edit</th>
             <th scope="col">Delete</th>
 
           </tr>
@@ -34,9 +35,11 @@
             <tr>
               <td><%= id %></td>
               <td><%= urls[id] %></td>
+
+              <td><form method="GET" action="/urls/9sm5xK"><input type="submit" class="btn btn-outline-primary" value="Edit"></form></td>
               <!--add a form element for each shortURL which uses a POST method-->
               <td><form method="POST" action="/urls/9sm5xK/delete"><input type="submit" class="btn btn-outline-danger" value="Delete"></form></td>
-
+              
             </tr>
           <% } %>
         </tbody>
