@@ -1,8 +1,25 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser")
 const app = express();
 const PORT = 8080; // default port 8080
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
+
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -11,6 +28,14 @@ const urlDatabase = {
 
 app.use(express.urlencoded({ extended: true }));
 
+const findUserByEmail = (userEmail) => {
+  for (const key in users) {
+    if (users[key].email === userEmail) {
+      return users[key];
+    }
+  }
+  return null;
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -39,7 +64,14 @@ app.get("/set", (req, res) => {
  });
 
  app.get("/urls", (req, res) => {
-  const templateVars = {urls: urlDatabase};
+  //const templateVars = {urls: urlDatabase};
+  //res.render("urls_index", templateVars);
+
+  //Display the Username
+  const templateVars = {
+    user: users[req.cookies.user_id],
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
  });
  
@@ -63,10 +95,12 @@ app.get("/set", (req, res) => {
 
  app.get("/urls/:id", (req, res) => {
   //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
+  const user = users[req.cookie.user_id];
   const id = req.params.id;
   const longURL = urlDatabase[req.params.id];
-  
-  const templateVars = {id, longURL};
+
+  const templateVars = {user, id, longURL};
+
   res.render("urls_show", templateVars);
  });
 
@@ -81,9 +115,9 @@ app.post("/urls/:id", (req, res) => {
   //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
   //const templateVars = {id: req.params.id, longURL: urlDatabase[req.params.id]};
   //res.render("urls_show", templateVars);
-  const id = req.params.id;
-  const longURL = req.body.longURL;
-  urlDatabase[id].longURL = longURL;
+  // const id = req.params.id;
+  // const longURL = req.body.longURL;
+  // urlDatabase[id].longURL = longURL;
   res.redirect("/urls");
  });
 
@@ -94,6 +128,57 @@ app.post("/urls/:id/delete", (req, res) => {
 
   res.redirect("/urls");
 });
+
+
+app.get("/register", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies.user_id],
+    urls: urlDatabase
+  };
+  res.render("urls_register", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  // To generate a random user ID
+  const id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = {
+    id, email, password
+  };
+
+  if (!email || !password) {
+    return res.status(400).send("Email or password is invaild, please check them.");
+  }
+  //
+  const userAlreadyExist = findUserByEmail(email);
+  if (userAlreadyExist) {
+    return res.status(400).send("User with ${email} is already exist.")
+  } else {
+    users[user.id] = user;
+    res.cookie('user_id', user.id);
+    res.redirect("/urls"); // Redirect the user to the /urls page.
+  }
+  console.log("Doing POST register")
+});
+
+app.post("/login", (req, res) => {  
+  // const username = req.body.username;
+  // res.cookie("user_id:", user_id);
+  // res.redirect("/urls");
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password ) {
+    return res.status(400).send("Email or password is empty!");
+  }
+//
+});
+
+ app.post("/logout", (req, res) => {  
+  //const username = req.body.username;
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+ });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
