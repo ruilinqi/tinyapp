@@ -34,7 +34,7 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id].longURL %></td>
               <td><form method="GET" action="/urls/<%= id %>"><input type="submit" class="btn btn-outline-primary" value="Edit"></form></td>
               <!--add a form element for each shortURL which uses a POST method-->
               <td><form method="POST" action="/urls/<%= id %>/delete"><input type="submit" class="btn btn-outline-danger" value="Delete"></form></td>
