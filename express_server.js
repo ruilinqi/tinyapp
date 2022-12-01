@@ -6,6 +6,10 @@ const cookieSession = require("cookie-session");
 const app = express();
 const PORT = 8080; // default port 8080
 
+const { getUserByEmail } = require('./helpers');
+
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cookieParser());
 app.use(cookieSession({ name: 'session', keys: ['key1', 'key2'] }));
 //
@@ -13,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
+//
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -42,16 +47,7 @@ const urlDatabase = {
 //   "9sm5xK": "http://www.google.com"
 // };
 
-app.use(express.urlencoded({ extended: true }));
 
-const getUserByEmail = (userEmail) => {
-  for (const key in users) {
-    if (users[key].email === userEmail) {
-      return users[key];
-    }
-  }
-  return null;
-};
 
 function generateRandomString() {
   let newid = Math.floor((1+Math.random()) * 0x1000000).toString(16).substring(1);
@@ -71,6 +67,7 @@ const urlsForUser = (id) => {
   }
   return userUrl;
 };
+//
 
 app.get("/", (req, res) => {
   const user = users[req.session.user_id];
@@ -186,9 +183,7 @@ app.get("/u/:id", (req, res) => {
   if (id) {
     res.redirect(urlDatabase[req.params.id].longURL); //urlDatabase[req.params.shortURL].longURL ///
   } else {
-    const user = users[req.session.user_id];
-    const errorMessage = 'This short url does not exist.';
-    res.status(404).render('urls_error', {user, errorMessage});
+    res.status(404).render('This short url does not exist.');
   }
 });
 
@@ -229,7 +224,13 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/login", (req, res) => {
+  const user = users[req.session.user_id];
+  const email = req.session.email;
 
+  const templateVars = {user, email};
+  res.render("urls_login", templateVars);
+});
 
 app.post("/login", (req, res) => {  
   //const id = req.body.id;
@@ -247,8 +248,8 @@ app.post("/login", (req, res) => {
 //purple-monkey-dinosaur
 if (bcrypt.compareSync(password, existedUser.password)) {
   console.log(password, existedUser.password);
-  //res.session("user_id", existedUser.id);
-  res.session.user_id = existedUser.id;
+  //res.cookie("user_id", existedUser.id);
+  req.session.user_id = existedUser.id;
   res.redirect("/urls");// If the user is logged in, GET /login should redirect to GET /urls
 } else {
       console.log(password, existedUser.password);
@@ -261,10 +262,11 @@ if (bcrypt.compareSync(password, existedUser.password)) {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = {
-    user: users[req.session.user_id],
-    urls: urlDatabase
-  };
+
+  const user = users[req.session.user_id];
+  const urls = urlDatabase;
+
+  const templateVars = { user, urls };
   res.render("urls_register", templateVars);
 });
 
@@ -291,20 +293,13 @@ app.post("/register", (req, res) => {
     const newUser = {id, email, password: hashedPassword};
     console.log(newUser);
     users[newUser.id] = newUser;
-    //res.session('user_id', newUser.id);
-    res.session.user_id = newUser.id;
+    //res.cookie('user_id', newUser.id);
+    req.session.user_id = newUser.id;
     res.redirect("/urls"); // If the user is logged in,, redirect the user to the /urls page.
   }
   console.log("Doing POST register");
 });
 
-app.get("/login", (req, res) => {
-  const templateVars = {
-    user: users[req.session.user_id],
-    urls: urlDatabase
-  };
-  res.render("urls_login", templateVars);
-});
 
  app.post("/logout", (req, res) => {  
   //res.clearCookie("user_id");
