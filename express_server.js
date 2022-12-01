@@ -85,7 +85,7 @@ app.get("/set", (req, res) => {
   if (user) {
     const newid = generateRandomString();
     const longURL = req.body.longURL;
-    urlDatabase[newid] = { longURL, newid};
+    urlDatabase[newid] = longURL;
     res.redirect(`/urls/${newid}`);// when it receives a POST request to /urls it responds with a redirection to /urls/:id.
 
   } else {
@@ -113,7 +113,7 @@ app.get("/set", (req, res) => {
   const longURL = urlDatabase[req.params.id];
 
   const templateVars = {user, id, longURL};
-
+  console.log("templateVars", templateVars);
   res.render("urls_show", templateVars);
  });
 
@@ -142,7 +142,9 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   //const longURL = urlDatabase[req.params.id];
   const longURL = req.body.longURL;
-  
+  console.log("id", id);
+  console.log("longURL", longURL);
+
   //const templateVars = {id, longURL};
   
   // when edit the url, if enter emtpy, then send error message
@@ -151,6 +153,9 @@ app.post("/urls/:id", (req, res) => {
     return res.status(401).send(errorMessage);
   } 
   urlDatabase[id] = longURL;
+  console.log("urlDatabase[id]", urlDatabase[id]);
+  console.log("longURL", longURL);
+
   res.redirect(`/urls`);
 });
 
