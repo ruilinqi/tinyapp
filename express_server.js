@@ -74,18 +74,24 @@ app.get("/set", (req, res) => {
   res.render("urls_index", templateVars);
  });
  
+ //after urls_new 
  //Add POST route to expressserver.js to receive form submission
  app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok. We are redirecting you to the new page you just created."); // Respond with 'Ok' (we will replace this)
+  console.log(req.body); // Log the POST request body to the console //{ longURL: 'www.google.ca' }
+  //res.send("Ok. We are redirecting you to the new page you just created."); // Respond with 'Ok' (we will replace this)
   
   // the id-longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
-  const newid = generateRandomString();
-  const { longURL } = req.body;
-  urlDatabase[newid] = { longURL, newid};
+  const user = users[req.cookies.user_id];
+  if (user) {
+    const newid = generateRandomString();
+    const longURL = req.body.longURL;
+    urlDatabase[newid] = { longURL, newid};
+    res.redirect(`/urls/${newid}`);// when it receives a POST request to /urls it responds with a redirection to /urls/:id.
 
-  // when it receives a POST request to /urls it responds with a redirection to /urls/:id.
-  res.redirect("/urls/:id");
+  } else {
+    res.status(400).send("Please log in first so that you can create short urls.")
+  }
+
 });
 
  app.get("/urls/new", (req, res) => {
@@ -94,11 +100,12 @@ app.get("/set", (req, res) => {
     const templateVars = { user };
     res.render("urls_new", templateVars);  
   } else {
-    res.redirect("/login");
+    //res.redirect("/login"); //If the user is not logged in, redirect GET /urls/new to GET /login
     return res.status(400).send("Please login first!")
   }
  });
 
+ //urls_show
  app.get("/urls/:id", (req, res) => {
   //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
   const user = users[req.cookies.user_id];
@@ -110,13 +117,20 @@ app.get("/set", (req, res) => {
   res.render("urls_show", templateVars);
  });
 
-
+// redirect to long url
 // Redirect any request to "/u/:id" to its longURL
 app.get("/u/:id", (req, res) => {
-  // const longURL = ...
-  res.redirect(longURL);
+  const id = urlDatabase[req.params.id];
+  if (id) {
+    res.redirect(urlDatabase[req.params.longURL]); //urlDatabase[req.params.shortURL].longURL
+  } else {
+    const user = users[req.cookies.user_id];
+    const errorMessage = 'This short url does not exist.';
+    res.status(404).render('urls_error', {user, errorMessage});
+  }
 });
 
+// url edit 
 app.post("/urls/:id", (req, res) => {
   //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
   //const templateVars = {id: req.params.id, longURL: urlDatabase[req.params.id]};
@@ -128,12 +142,17 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   //const longURL = urlDatabase[req.params.id];
   const longURL = req.body.longURL;
-  urlDatabase[id].longURL = longURL;
-
-  const templateVars = {user, id, longURL};
-
-  res.redirect("/urls");
- });
+  
+  //const templateVars = {id, longURL};
+  
+  // when edit the url, if enter emtpy, then send error message
+  if (!id || !longURL) {
+    const errorMessage = 'Short url or long url does not exist.';
+    return res.status(401).send(errorMessage);
+  } 
+  urlDatabase[id] = longURL;
+  res.redirect(`/urls`);
+});
 
 // Add POST route for /urls/:id/delete to remove URLs
 app.post("/urls/:id/delete", (req, res) => {
@@ -171,7 +190,7 @@ app.post("/register", (req, res) => {
   } else {
     users[user.id] = user;
     res.cookie('user_id', user.id);
-    res.redirect("/urls"); // Redirect the user to the /urls page.
+    res.redirect("/urls"); // If the user is logged in,, redirect the user to the /urls page.
   }
   console.log("Doing POST register");
 });
@@ -202,7 +221,7 @@ app.post("/login", (req, res) => {
       return res.status(403).send("Your password is wrong!");
     } else {
       res.cookie("user_id", userAlreadyExist.id);
-      res.redirect("/urls");
+      res.redirect("/urls");// If the user is logged in, GET /login should redirect to GET /urls
     }
   }
   console.log("Doing POST login");
