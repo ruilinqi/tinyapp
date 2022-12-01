@@ -1,6 +1,8 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser")
+const bcrypt = require("bcryptjs");
+
 const app = express();
 const PORT = 8080; // default port 8080
 app.use(cookieParser());
@@ -8,18 +10,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
+// const users = {
+//   userRandomID: {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur",
+//   },
+//   user2RandomID: {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk",
+//   },
+// };
 
 const urlDatabase = {
   b6UTxQ: {
@@ -225,6 +227,35 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 
+
+app.post("/login", (req, res) => {  
+  //const id = req.body.id;
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  if (email === '' || password === '') {
+    return res.status(400).send("Email or password is invaild!");
+  }
+  const existedUser = getUserByEmail(email);
+  if (!existedUser) {
+    return res.status(403).send("Your email hasn't registered yet!");
+  } else if (existedUser) {
+    //console.log(req.body, email, password);
+//purple-monkey-dinosaur
+if (bcrypt.compareSync(password, existedUser.password)) {
+  console.log(password, existedUser.password);
+  res.cookie("user_id", existedUser.id);
+  res.redirect("/urls");// If the user is logged in, GET /login should redirect to GET /urls
+} else {
+      console.log(password, existedUser.password);
+      return res.status(403).send("Your password is wrong!");
+      
+    }
+  }
+  console.log("Doing POST login");
+  
+});
+
 app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
@@ -238,6 +269,9 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   const user = {
     id, email, password
   };
@@ -248,10 +282,12 @@ app.post("/register", (req, res) => {
   //
   const userAlreadyExist = getUserByEmail(email);
   if (userAlreadyExist) {
-    return res.status(400).send(`User with ${email} is already exist.`)
+    return res.status(400).send(`User with ${email} is already registered.`)
   } else {
-    users[user.id] = user;
-    res.cookie('user_id', user.id);
+    const newUser = {id, email, password: hashedPassword};
+    console.log(newUser);
+    users[newUser.id] = newUser;
+    res.cookie('user_id', newUser.id);
     res.redirect("/urls"); // If the user is logged in,, redirect the user to the /urls page.
   }
   console.log("Doing POST register");
@@ -263,31 +299,6 @@ app.get("/login", (req, res) => {
     urls: urlDatabase
   };
   res.render("urls_login", templateVars);
-});
-
-app.post("/login", (req, res) => {  
-  //const id = req.body.id;
-  const email = req.body.email;
-  const password = req.body.password;
-  if (email === '' || password === '') {
-    return res.status(400).send("Email or password is invaild!");
-  }
-  const userAlreadyExist = getUserByEmail(email);
-  if (!userAlreadyExist) {
-    return res.status(403).send("Your email hasn't registered yet!");
-  } else if (userAlreadyExist) {
-    console.log(userAlreadyExist.password, password);
-    console.log(req.body, email, password);
-
-    if (userAlreadyExist.password !== password) {
-      return res.status(403).send("Your password is wrong!");
-    } else {
-      res.cookie("user_id", userAlreadyExist.id);
-      res.redirect("/urls");// If the user is logged in, GET /login should redirect to GET /urls
-    }
-  }
-  console.log("Doing POST login");
-
 });
 
  app.post("/logout", (req, res) => {  
