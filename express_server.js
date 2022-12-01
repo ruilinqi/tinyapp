@@ -2,26 +2,29 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser")
 const bcrypt = require("bcryptjs");
-
+const cookieSession = require("cookie-session");
 const app = express();
 const PORT = 8080; // default port 8080
+
 app.use(cookieParser());
+app.use(cookieSession({ name: 'session', keys: ['key1', 'key2'] }));
+//
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
-// const users = {
-//   userRandomID: {
-//     id: "userRandomID",
-//     email: "user@example.com",
-//     password: "purple-monkey-dinosaur",
-//   },
-//   user2RandomID: {
-//     id: "user2RandomID",
-//     email: "user2@example.com",
-//     password: "dishwasher-funk",
-//   },
-// };
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10),
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: bcrypt.hashSync("dishwasher-funk", 10),
+  },
+};
 
 const urlDatabase = {
   b6UTxQ: {
@@ -70,8 +73,8 @@ const urlsForUser = (id) => {
 };
 
 app.get("/", (req, res) => {
-  const user = users[req.cookies.user_id];
-  const urls = urlsForUser(req.cookies.user_id);
+  const user = users[req.session.user_id];
+  const urls = urlsForUser(req.session.user_id);
   
   if (!user) {
     res.redirect("/login");
@@ -106,12 +109,12 @@ app.get("/set", (req, res) => {
  app.get("/urls", (req, res) => {
   //const templateVars = {urls: urlDatabase};
   //res.render("urls_index", templateVars);
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
 
   if (!user) {
     return res.status(400).send("Please <a href='/login'> login </a> or <a href='/register'> register</a>!")
   }
-  const urls = urlsForUser(req.cookies.user_id);
+  const urls = urlsForUser(req.session.user_id);
   const templateVars = { user, urls };
   console.log("templateVars:", templateVars)
   res.render("urls_index", templateVars);
@@ -124,8 +127,8 @@ app.get("/set", (req, res) => {
   //res.send("Ok. We are redirecting you to the new page you just created."); // Respond with 'Ok' (we will replace this)
   
   // the id-longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
-  const user = users[req.cookies.user_id];
-  const userID = req.cookies.user_id;
+  const user = users[req.session.user_id];
+  const userID = req.session.user_id;
   console.log("userID", userID); 
   const newid = generateRandomString();
   const { longURL } = req.body;
@@ -143,7 +146,7 @@ app.get("/set", (req, res) => {
 });
 
  app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   if (user) {
     const templateVars = { user };
     res.render("urls_new", templateVars);  
@@ -156,11 +159,11 @@ app.get("/set", (req, res) => {
  //urls_show
  app.get("/urls/:id", (req, res) => {
   //Use the id from the route parameter to lookup it's associated longURL from the urlDatabase
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   const id = req.params.id;
   const longURL = urlDatabase[req.params.id].longURL;
   
-  const currentUserID = req.cookies.user_id;
+  const currentUserID = req.session.user_id;
   const userIDOfUrl = urlDatabase[req.params.id].userID;
 
   
@@ -183,7 +186,7 @@ app.get("/u/:id", (req, res) => {
   if (id) {
     res.redirect(urlDatabase[req.params.id].longURL); //urlDatabase[req.params.shortURL].longURL ///
   } else {
-    const user = users[req.cookies.user_id];
+    const user = users[req.session.user_id];
     const errorMessage = 'This short url does not exist.';
     res.status(404).render('urls_error', {user, errorMessage});
   }
@@ -197,7 +200,7 @@ app.post("/urls/:id", (req, res) => {
   // const id = req.params.id;
   // const longURL = req.body.longURL;
   // urlDatabase[id].longURL = longURL;
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   const id = req.params.id;
   //const longURL = urlDatabase[req.params.id];
   const longURL = req.body.longURL;
@@ -244,7 +247,8 @@ app.post("/login", (req, res) => {
 //purple-monkey-dinosaur
 if (bcrypt.compareSync(password, existedUser.password)) {
   console.log(password, existedUser.password);
-  res.cookie("user_id", existedUser.id);
+  //res.session("user_id", existedUser.id);
+  res.session.user_id = existedUser.id;
   res.redirect("/urls");// If the user is logged in, GET /login should redirect to GET /urls
 } else {
       console.log(password, existedUser.password);
@@ -258,7 +262,7 @@ if (bcrypt.compareSync(password, existedUser.password)) {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
     urls: urlDatabase
   };
   res.render("urls_register", templateVars);
@@ -287,7 +291,8 @@ app.post("/register", (req, res) => {
     const newUser = {id, email, password: hashedPassword};
     console.log(newUser);
     users[newUser.id] = newUser;
-    res.cookie('user_id', newUser.id);
+    //res.session('user_id', newUser.id);
+    res.session.user_id = newUser.id;
     res.redirect("/urls"); // If the user is logged in,, redirect the user to the /urls page.
   }
   console.log("Doing POST register");
@@ -295,14 +300,15 @@ app.post("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
     urls: urlDatabase
   };
   res.render("urls_login", templateVars);
 });
 
  app.post("/logout", (req, res) => {  
-  res.clearCookie("user_id");
+  //res.clearCookie("user_id");
+  res.session = null;
   res.redirect("/login");
  });
 
