@@ -19,13 +19,12 @@
       </div>
     </div>
 
-    <div>
+    <div style="padding: 0.5em 0.5em 0;">
       <% if (user) { %>
         <form method="POST" action="/logout" class="form-line">
           <div class="form-group">
-            <label for="longURL"> Login </label>
-            <label>Logged In As: <%= user.email %></label>
-            <button type="submit" class="btn btn-primary">Logout</button>
+            <label style="padding-right: 1em;">Logged In As: <%= user.email %></label>
+            <button type="submit" class="btn btn-outline-dark">Logout</button>
           </div>
         </form>
       <% } else { %>
