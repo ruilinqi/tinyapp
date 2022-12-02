@@ -35,3 +35,17 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 - Install all dependencies (using the `npm install` command).
 - Run the development web server using the `node express_server.js` command.
+- Go to localhost:8080 on your bowser. Its link: http://localhost:8080/urls
+
+## Instructions
+
+- Register
+Please register as a new user so that you are able to view, edit, delete urls. Build your own urls!
+- Create urls
+Free feel to click button called "Create New URL" on the header. Fulfill your url, click submit button, you will see your urls on the main page!
+- Edit urls
+You can edit the existing urls by clicking button called "Edit".
+- Delete urls
+You can delete your urls by ciicking "Delete" button.
+
+Enjoy!
