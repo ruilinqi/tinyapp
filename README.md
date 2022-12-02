@@ -39,13 +39,16 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Instructions
 
-- Register
+##### Register
 Please register as a new user so that you are able to view, edit, delete urls. Build your own urls!
-- Create urls
+
+##### Create urls
 Free feel to click button called "Create New URL" on the header. Fulfill your url, click submit button, you will see your urls on the main page!
-- Edit urls
+
+##### Edit urls
 You can edit the existing urls by clicking button called "Edit".
-- Delete urls
+
+##### Delete urls
 You can delete your urls by ciicking "Delete" button.
 
 Enjoy!
