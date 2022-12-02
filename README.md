@@ -4,22 +4,22 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-##### Urls main page
+Urls main page
 !["Screenshot of Urls page"](https://github.com/ruilinqi/tinyapp/blob/master/docs/urls-page.png)
 
-##### Register page
+Register page
 !["Screenshot of Register page"](https://github.com/ruilinqi/tinyapp/blob/master/docs/register-page.png)
 
-##### Login page
+Login page
 !["Screenshot of Login page"](https://github.com/ruilinqi/tinyapp/blob/master/docs/login-page.png)
 
-##### Create Urls page
+Create Urls page
 !["Screenshot of Create Urls page"](https://github.com/ruilinqi/tinyapp/blob/master/docs/create-url-page.png)
 
-##### Edit Urls page
+Edit Urls page
 !["Screenshot of Edit Urls page"](https://github.com/ruilinqi/tinyapp/blob/master/docs/edit-url-page.png)
 
-##### Urls Example page
+Urls Example page
 !["Screenshot of Urls Example page"](https://github.com/ruilinqi/tinyapp/blob/master/docs/urls-example-page.page.png)
 
 
@@ -39,16 +39,16 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Instructions
 
-##### Register
+#### Register
 Please register as a new user so that you are able to view, edit, delete urls. Build your own urls!
 
-##### Create urls
+#### Create urls
 Free feel to click button called "Create New URL" on the header. Fulfill your url, click submit button, you will see your urls on the main page!
 
-##### Edit urls
+#### Edit urls
 You can edit the existing urls by clicking button called "Edit".
 
-##### Delete urls
+#### Delete urls
 You can delete your urls by ciicking "Delete" button.
 
 Enjoy!
